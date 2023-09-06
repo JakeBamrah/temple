@@ -8,7 +8,7 @@
 
 /*
  * Temple syntax identifiers are found while traversing an input string and are
- * tracked using a stack. Identifiers are always initialized with '{{ }}'
+ * tracked using a stack. Identifiers are always initialized with '{{ id }}'
  * syntax. Content within these brackets are treated as IDENTIFIER tokens and
  * content found outside these brackets are treated as DATA tokens.
  */
@@ -77,11 +77,12 @@ int tokenize(const char *text, Token *tokens) {
 
                 reset_str_buf(&j, &str_start_size, str_buf);
             }
-
-            // or initiate open block
-            Token t = {0, TOKEN_BLOCK_OPEN, line_no};
-            tokens[token_count++] = t;
-            stack_push(&stack, TOKEN_BLOCK_OPEN);
+            if (text[i - 1] == '{' && text[i] != '{') { // check if EOF or open
+                Token t = {0, TOKEN_BLOCK_OPEN, line_no};
+                tokens[token_count++] = t;
+                stack_push(&stack, TOKEN_BLOCK_OPEN);
+                continue;
+            }
         } else if (state == TOKEN_BLOCK_OPEN) {
             // find identifier token contents (if, var, etc.)
             // identifiers *should* be on one line so line_no remains constant

@@ -56,6 +56,13 @@ START_TEST (tokenize_all) {
 }
 END_TEST
 
+START_TEST (basic_tokenize_check) {
+    char *text = "This is a test";
+    Token tokens[1000];
+    int token_count = tokenize(text, tokens);
+    ck_assert_int_eq(token_count, 1);
+}
+
 START_TEST (tokenize_sanity_check) {
     char *text = "This is a {{ if test }} for template-engine\n {{ else }} "
                  "this is a {{ var variable }} test {{ endblock }}\nand if "
@@ -67,7 +74,6 @@ START_TEST (tokenize_sanity_check) {
 }
 END_TEST
 
-
 int main(void)
 {
     Suite *s1 = suite_create("Core");
@@ -78,6 +84,7 @@ int main(void)
     suite_add_tcase(s1, tc1_1);
     tcase_add_test(tc1_1, reset_str_buffer);
     tcase_add_test(tc1_1, tokenize_all);
+    tcase_add_test(tc1_1, basic_tokenize_check);
     tcase_add_test(tc1_1, tokenize_sanity_check);
 
     srunner_run_all(sr, CK_ENV);

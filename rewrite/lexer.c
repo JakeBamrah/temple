@@ -17,10 +17,14 @@
 
 const char *print_expr(enum Expression expr) {
     switch (expr) {
+    case TOKEN_EXPR_OPEN:
+        return "OPEN EXPRESSION TOKEN";
+    case TOKEN_EXPR_CLOSE:
+        return "CLOSE EXPRESSION TOKEN";
     case TOKEN_BLOCK_OPEN:
-        return "OPEN TOKEN";
+        return "OPEN BLOCK TOKEN";
     case TOKEN_BLOCK_CLOSE:
-        return "CLOSE TOKEN";
+        return "CLOSE BLOCK TOKEN";
     case TOKEN_IDENTIFIER:
         return "IDENTIFIER TOKEN";
     case TOKEN_DATA:
@@ -56,7 +60,12 @@ int tokenize(const char *text, Token *tokens) {
         enum Expression state = stack_empty(&stack) ? TOKEN_DEFAULT : stack_peek(&stack);
         if (state == TOKEN_DEFAULT) {
             // build normal content string (outside tokens)
-            while (i < len && text[i - 1] != '{' && text[i] != '{') {
+            while (i < len) {
+                if (i < len - 1 && text[i] == '{'
+                    && (text[i + 1] == '{' || text[i + 1] == '%')) {
+                    break;
+                }
+
                 if (text[i] == '\n') {
                     line_no++;
                 }
@@ -68,6 +77,7 @@ int tokenize(const char *text, Token *tokens) {
                 }
                 str_buf[j++] = text[i++];
             }
+
             if (j > 0) { // end of content string (create content token)
                 str_buf[j] = '\0';
                 Token t = {"", TOKEN_DATA, line_no};
@@ -77,16 +87,21 @@ int tokenize(const char *text, Token *tokens) {
 
                 reset_str_buf(&j, &str_start_size, str_buf);
             }
-            if (text[i - 1] == '{' && text[i] != '{') { // check if EOF or open
-                Token t = {0, TOKEN_BLOCK_OPEN, line_no};
-                tokens[token_count++] = t;
-                stack_push(&stack, TOKEN_BLOCK_OPEN);
-                continue;
+
+            if (i < len - 1) { // open token found (not EOF)
+                enum Expression expr = text[i + 1] == '{' ? TOKEN_EXPR_OPEN : TOKEN_BLOCK_OPEN;
+                tokens[token_count++] = (Token){0, expr, line_no};
+                stack_push(&stack, expr);
             }
-        } else if (state == TOKEN_BLOCK_OPEN) {
+        } else if (state == TOKEN_BLOCK_OPEN || state == TOKEN_EXPR_OPEN) {
             // find identifier token contents (if, var, etc.)
             // identifiers *should* be on one line so line_no remains constant
-            while (i < len && text[i - 1] != '}' && text[i] != '}') {
+            while (i < len) {
+                if (i < len - 1 && (text[i] == '}' || text[i] == '%')
+                    && text[i + 1] == '}') {
+                    break;
+                }
+
                 if (j > str_start_size) {
                     str_start_size = str_start_size * 2;
                     str_buf = (char *)realloc(str_buf, sizeof(char) * str_start_size);
@@ -107,8 +122,8 @@ int tokenize(const char *text, Token *tokens) {
                 i++;
             }
 
-            Token t = {0, TOKEN_BLOCK_CLOSE, line_no};
-            tokens[token_count++] = t;
+            enum Expression e = text[i] == '}' ? TOKEN_EXPR_CLOSE : TOKEN_BLOCK_CLOSE;
+            tokens[token_count++] = (Token){0, e, line_no};
             stack_pop(&stack);
         }
         i++;

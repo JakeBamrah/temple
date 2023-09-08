@@ -1,7 +1,10 @@
 #include <stdint.h>
 
 
+/* --------------------------------- Lexer --------------------------------- */
 enum Expression {
+    TOKEN_EXPR_OPEN,
+    TOKEN_EXPR_CLOSE,
     TOKEN_BLOCK_OPEN,
     TOKEN_BLOCK_CLOSE,
     TOKEN_IDENTIFIER,

@@ -19,8 +19,8 @@ START_TEST (reset_str_buffer) {
 END_TEST
 
 START_TEST (tokenize_all) {
-    char *text = "This is a {{ if test }} for template-engine\n {{ else }} "
-                 "this is a {{ var variable }} test {{ endblock }}";
+    char *text = "This is a {% if test %} for template-engine\n {% else %} "
+                 "this is a {{ variable }} test {% endblock %}";
     Token tokens_cmp[18] = {
         { "This is a ", TOKEN_DATA, 0},
         { 0, TOKEN_BLOCK_OPEN, 0},
@@ -32,10 +32,9 @@ START_TEST (tokenize_all) {
         { "else", TOKEN_IDENTIFIER, 1},
         { 0, TOKEN_BLOCK_CLOSE, 1},
         { " this is a ", TOKEN_DATA, 1},
-        { 0, TOKEN_BLOCK_OPEN, 1},
-        { "var", TOKEN_IDENTIFIER, 1},
+        { 0, TOKEN_EXPR_OPEN, 1},
         { "variable", TOKEN_IDENTIFIER, 1},
-        { 0, TOKEN_BLOCK_CLOSE, 1},
+        { 0, TOKEN_EXPR_CLOSE, 1},
         { " test ", TOKEN_DATA, 1},
         { 0, TOKEN_BLOCK_OPEN, 1},
         { "endblock", TOKEN_IDENTIFIER, 1},
@@ -52,7 +51,7 @@ START_TEST (tokenize_all) {
         ck_assert_int_eq(tokens[i].type, tokens_cmp[i].type);
     }
 
-    ck_assert_int_eq(token_count, 18);
+    ck_assert_int_eq(token_count, 17);
 }
 END_TEST
 
@@ -64,13 +63,13 @@ START_TEST (basic_tokenize_check) {
 }
 
 START_TEST (tokenize_sanity_check) {
-    char *text = "This is a {{ if test }} for template-engine\n {{ else }} "
-                 "this is a {{ var variable }} test {{ endblock }}\nand if "
-                 "this is a text then we will try {{ extends 'base.html' }}";
+    char *text = "This is a {% if test %} for template-engine\n {% else %} "
+                 "this is a {{ variable }} test {% endblock %}\nand if "
+                 "this is a text then we will try {% extends 'base.html' %}";
 
     Token tokens[1000];
     int token_count = tokenize(text, tokens);
-    ck_assert_int_eq(token_count, 23);
+    ck_assert_int_eq(token_count, 22);
 }
 END_TEST
 

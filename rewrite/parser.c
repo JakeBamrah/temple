@@ -79,9 +79,13 @@ void parse_expression(int *t_position, int t_count, TokenNode *t_nodes, struct A
     return;
 }
 
-struct ASTNode * build_ast(int *t_position, int t_count, TokenNode *t_nodes, struct ASTNode *root) {
+struct ASTNode *build_ast(int *t_position, int t_count, TokenNode *t_nodes, struct ASTNode *root) {
     if (root->identifier == ID_ENDBLOCK) {
         return root;
+    }
+
+    if (root->type != AST_TEMPLATE) {
+        root->type = AST_BLOCK_EXPRESSION;
     }
 
     root->children = malloc(sizeof(struct ASTNode) * 20);

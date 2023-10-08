@@ -49,9 +49,11 @@ struct ASTNode {
     enum Identifier identifier;
     char *arguments[20];
     char *content;
-    int arguments_len;
     int children_len;
+    int arguments_len;
+    int has_inverse_node;
     struct ASTNode *children;
+    struct ASTNode *inverse_node;
 };
 
 void print_ast_node(struct ASTNode *node);
@@ -63,3 +65,7 @@ enum Identifier parse_identifier(TokenNode *t_node);
 void parse_content(int *t_pos, TokenNode *t_node, struct ASTNode *node);
 void parse_expression(int *t_pos, int t_count, TokenNode *t_nodes, struct ASTNode *node);
 struct ASTNode * build_ast(int *t_pos, int t_count, TokenNode *t_nodes, struct ASTNode *root);
+
+/* -------------------------------- Interpreter --------------------------------- */
+void traverse(struct ASTNode *root);
+void visit_block_expression(struct ASTNode *root);

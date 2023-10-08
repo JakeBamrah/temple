@@ -8,7 +8,6 @@
 #include "temple.h"
 
 void visit_content(struct ASTNode *root) {
-    // printf("PRINTING CONTENT");
     printf("%s ", root->content);
 }
 
@@ -21,6 +20,7 @@ void visit_expression(struct ASTNode *root) {
             printf("%s", root->arguments[0]);
             break;
         case ID_EXTENDS:
+            // leave extends until last, evaluate rest of template first
             printf("EXTENDING\n");
             break;
         default:
@@ -28,32 +28,55 @@ void visit_expression(struct ASTNode *root) {
     }
     return;
 }
-void visit_block_expression(struct ASTNode *root) {
-    // build string for root and return it?
-    if (root->identifier == ID_INSERT) {
-        // save first arg with string as value in ternary tree
-    }
 
+void visit_block_expression(struct ASTNode *root) {
     for (int i = 0; i < root->children_len; i++) {
         struct ASTNode node = root->children[i];
-        enum ASTNodeType ast_type = node.type;
-        switch(ast_type) {
-            case AST_CONTENT:
-                visit_content(&node);
+        enum Identifier id = node.identifier;
+        switch(id) {
+            case ID_IF:
+                // TODO: validate if statement properly using args list
+                if (!node.arguments[0]) {
+                    for (int j = 0; j < node.children_len; j++) {
+                        if (node.children[j].identifier == ID_ELSE)
+                            continue;
+                        traverse(&node.children[j]);
+                    }
+                }
+                else {
+                    if (node.has_inverse_node) {
+                        traverse(node.inverse_node);
+                    }
+                }
                 break;
-            case AST_EXPRESSION:
-                visit_expression(&node);
-                break;
-            case AST_BLOCK_EXPRESSION:
-                // evaluate if statement
-                // if true, iterate through children until else
-                // otherwise, pass else to visit_block_expression
-                // if INSERT node encountered, add root result to ternary tree
-                visit_block_expression(&node);
+            case ID_INSERT:
+                // save first arg with string as value in ternary tree
+                traverse(&node);
                 break;
             default:
+                traverse(&node);
                 break;
         }
+    }
+}
+
+void traverse(struct ASTNode *root) {
+    // build string for root and return it?
+    switch(root->type) {
+        case AST_CONTENT:
+            visit_content(root);
+            break;
+        case AST_EXPRESSION:
+            visit_expression(root);
+            break;
+        case AST_BLOCK_EXPRESSION:
+            visit_block_expression(root);
+            break;
+        case AST_TEMPLATE:
+            visit_block_expression(root);
+            break;
+        default:
+            break;
     }
     return;
 }
@@ -73,8 +96,8 @@ int main() {
  root.type = AST_TEMPLATE;
  root.identifier = ID_TEMPLATE;
  build_ast(&token_pos, token_count, tokens, &root);
- // print_nary_tree(0, &root);
- visit_block_expression(&root);
+ /* print_nary_tree(0, &root); */
+ traverse(&root);
 
  return 0;
 };

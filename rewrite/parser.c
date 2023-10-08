@@ -103,9 +103,12 @@ struct ASTNode *build_ast(int *t_position, int t_count, TokenNode *t_nodes, stru
             struct ASTNode *child = build_ast(
                     t_position, t_count, t_nodes,
                     &root->children[root->children_len - 1]);
-            // END and ELSE blocks are the only nested structures that need
-            // to be returned to un-nest future child nodes for parent
-            if (child->identifier == ID_ENDBLOCK || child->identifier == ID_ELSE)
+            if (child->identifier == ID_ELSE) {
+                root->inverse_node = child;
+                root->has_inverse_node = 1;
+                return root;
+            }
+            if (child->identifier == ID_ENDBLOCK)
                 return root;
             break;
         default:

@@ -67,5 +67,5 @@ void parse_expression(int *t_pos, int t_count, TokenNode *t_nodes, struct ASTNod
 struct ASTNode * build_ast(int *t_pos, int t_count, TokenNode *t_nodes, struct ASTNode *root);
 
 /* -------------------------------- Interpreter --------------------------------- */
-void traverse(struct ASTNode *root);
-void visit_block_expression(struct ASTNode *root);
+void traverse(struct ASTNode *root, char *buff);
+void visit_block_expression(struct ASTNode *root, char *buff);

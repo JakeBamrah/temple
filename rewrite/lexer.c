@@ -50,14 +50,14 @@ int tokenize(const char *text, TokenNode *tokens) {
     int token_count = 0;
     uint16_t line_no = 0;
     int len = strlen(text);
-    Stack stack = stack_init();
+    stack s = stack_init();
 
     // str buffer vars
     int j = 0;
     int str_start_size = INITIAL_BUF_SIZE;
     char *str_buf = (char *)malloc(sizeof(char) * str_start_size);
     for (int i = 0; i < len; i++) {
-        enum Token state = stack_empty(&stack) ? TOKEN_DEFAULT : stack_peek(&stack);
+        enum Token state = stack_empty(&s) ? TOKEN_DEFAULT : stack_peek(&s);
         if (state == TOKEN_DEFAULT) {
             // build normal content string (outside tokens)
             while (i < len) {
@@ -91,7 +91,7 @@ int tokenize(const char *text, TokenNode *tokens) {
             if (i < len - 1) { // open token found (not EOF)
                 enum Token expr = text[i + 1] == '{' ? TOKEN_EXPR_OPEN : TOKEN_BLOCK_OPEN;
                 tokens[token_count++] = (TokenNode){0, 0, expr, line_no};
-                stack_push(&stack, expr);
+                stack_push(&s, expr);
             }
         } else if (state == TOKEN_BLOCK_OPEN || state == TOKEN_EXPR_OPEN) {
             // find identifier token contents (if, var, etc.)
@@ -124,7 +124,7 @@ int tokenize(const char *text, TokenNode *tokens) {
 
             enum Token e = text[i] == '}' ? TOKEN_EXPR_CLOSE : TOKEN_BLOCK_CLOSE;
             tokens[token_count++] = (TokenNode){0, 0, e, line_no};
-            stack_pop(&stack);
+            stack_pop(&s);
         }
         i++;
     }

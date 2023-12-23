@@ -16,18 +16,16 @@ class Interpreter:
 
     Note: A child can only "extend" (inherit) from *one* parent.
 
-   :param obj expression_vars: variables to be evaluated as booleans
-   :param obj template_vars: variables to be replaced in templates
-   :param obj insert_vars: carries insert block information to parent templates
-   :param str extends: stores a parent template to extend from
-   :type obj : dict[str: str]
+   :param obj template_vars : variables to be replaced in templates
+   :param obj insert_vars   : carries insert block info to parent template
+   :param str extends       : stores a parent template to extend from
+   :type obj                : dict[str: str]
    """
 
-    def __init__(self, expression_vars=None, template_vars=None, insert_vars=None):
+    def __init__(self, template_vars=None, insert_vars=None):
         self.body = {}
         self.extends = None
         self.template_vars = template_vars or {}
-        self.expression_vars = expression_vars or {}
         self.insert_vars = insert_vars or {}
 
 
@@ -54,13 +52,17 @@ class Interpreter:
         keys to fill in their insert blocks later in the traversal. If
         insert_vars are provided, we assume that this is a top-level or parent
         file.
+
+        :param ASTNode root : root node for AST
+        :param str key      : key used to insert content into body object
+        :return             : None
         """
         for node in root.children:
             match node.expression_id:
                 case ExpressionType.IF:
                     # check whether expression boolean has been passed
                     # TODO: implement if statement comparison logic rather than simple boolean
-                    if (self.expression_vars.get(node.args[0])):
+                    if (self.template_vars.get(node.args[0])):
                         for c in node.children:
                             self.traverse(c, key)
                     elif node.inverse_node: # otherwise defer to else statement

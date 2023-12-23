@@ -8,8 +8,7 @@ from parser import Parser
 from interpreter import Interpreter
 
 
-def compile_template(filename, key='root', expression_vars=None,
-                     template_vars=None, insert_vars=None):
+def compile_template(filename, key='root', template_vars=None, insert_vars=None):
     text = ""
     path = pathlib.Path(filename)
     dir_prefix = path.resolve().parent
@@ -17,26 +16,23 @@ def compile_template(filename, key='root', expression_vars=None,
         text = f.read()
 
     # tokenize templates
-    l = Lexer()
-    l.tokenize(text)
+    l = Lexer(text=text)
 
     # build AST for templates
-    p = Parser()
-    p.build_ast(l.tokens, p.root)
+    p = Parser(tokens=l.tokens)
 
-    # convert ast into completed corpus
-    i = Interpreter(expression_vars=expression_vars,
-                    template_vars=template_vars, insert_vars=insert_vars)
+    # convert AST into completed corpus
+    i = Interpreter(template_vars=template_vars, insert_vars=insert_vars)
     i.traverse(p.root, key)
     body = i.body
 
     # build text and html for current file
     # if extension doc provided we recursively traverse parents from bottom-up
-    # and use our child "body" object to fill INSERT variables in parents
+    # whilie using our child "body" object to fill INSERT variables in parents
     if i.extends:
         path = dir_prefix.joinpath(i.extends) # convert rel. path to abs. for parent
-        body = compile_template(path, key, expression_vars=expression_vars,
-                                template_vars=template_vars, insert_vars=i.body)
+        body = compile_template(path, key, template_vars=template_vars,
+                                insert_vars=i.body)
     return body # final body obj will always contain a root key with content
 
 

@@ -1,0 +1,18 @@
+# Setup temple as a local package so that it can be imported in child files,
+# e.g. unittests. Install package locally: "pip install -e ." from root dir
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "temple"
+authors = [
+   {name = "Jake Bamrah" },
+]
+description = "Temple templating engine."
+requires-python = ">=3.10"
+version = "0.0.1"
+
+[tool.setuptools]
+py-modules = ['temple']
+

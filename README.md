@@ -1,25 +1,72 @@
 # Temple
-A dumb template-engine built for *extremely* simple usecases.
+A simple template-engine built for *extremely* simple usecases.
 
 Supports:
-  - Extension using base templates
-  - Basic for-loops
   - HTML block insertion
+  - Expressions (conditionals and variables)
+  - Template inheritance (extension) using base templates
+  - Recursive inheritance support (one parent / extension per template doc)
 
-### Using
+### Usage
 Syntax is similar to many of the popular template-engines.
 
-- Template actions must be on their own lines for now
-- Extending a parent must include a block with the same name as parent's extension block (see `unittests/*.html` files for examples)
+`{{ ... }}` - Expressions, extending and variables
+
+`{% ... %}`  - Block statements such as `if` / `else`
+
+**Note:** Conditional logic can only do truthy checks and cannot evaluate comparisons as of yet.
+
+#### Variables
+```html
+<html>
+  <body>
+    <div>
+      This is a var: {{ expr_variable }}
+    </div>
+  </body>
+<html>
+```
+
+#### Conditionals
+```html
+<html>
+  <body>
+    {% if boolean_value %}
+      <div>Truthy conditional</div>
+    {% else %}
+      <div>Falsey conditional</div>
+    {% endblock %}
+  </body>
+<html>
+```
+
+#### Inheritance
+```
+<!-- parent template -->
+<html>
+  <head>
+    {% insert head %}{% endblock %}
+  </head>
+  <body>
+    {% insert child %}{% endblock %}
+  </body>
+<html>
+```
 
 ```html
-{% extends "base.html" %}
-<html>
-  <body>
-    {% block child %}
-    {% endblock %}
-  <body>
-<html>
+<!-- child template -->
+{{ extends base.html }}
+{% insert head %}
+  <style>
+    p {
+      color: red;
+    }
+  </style
+{% endblock %}
+{% insert child %}
+  <div>
+    This is a child
+  </div>
 {% endblock %}
 ```
 

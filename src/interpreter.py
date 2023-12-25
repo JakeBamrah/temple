@@ -1,3 +1,4 @@
+from evaluate import safe_eval
 from parser import ASTNodeType, ExpressionType
 
 
@@ -16,11 +17,11 @@ class Interpreter:
 
     Note: A child can only "extend" (inherit) from *one* parent.
 
-   :param obj template_vars : variables to be replaced in templates
-   :param obj insert_vars   : carries insert block info to parent template
-   :param str extends       : stores a parent template to extend from
-   :type obj                : dict[str: str]
-   """
+    :param obj template_vars : variables to be replaced in templates
+    :param obj insert_vars   : carries insert block info to parent template
+    :param str extends       : stores a parent template to extend from
+    :type obj                : dict[str: str]
+    """
 
     def __init__(self, template_vars=None, insert_vars=None):
         self.body = {}
@@ -39,7 +40,7 @@ class Interpreter:
         """
         match root.expression_id:
             case ExpressionType.VAR:
-                self.body[key] += self.template_vars.get(root.args[0], '')
+                self.body[key] += safe_eval(root.args[0], vars=self.template_vars)
             case ExpressionType.EXTENDS:
                 self.extends = root.args[0]
             case _:
@@ -61,8 +62,8 @@ class Interpreter:
             match node.expression_id:
                 case ExpressionType.IF:
                     # check whether expression boolean has been passed
-                    # TODO: implement if statement comparison logic rather than simple boolean
-                    if (self.template_vars.get(node.args[0])):
+                    expr = "".join(node.args)
+                    if (safe_eval(expr, vars=self.template_vars)):
                         for c in node.children:
                             self.traverse(c, key)
                     elif node.inverse_node: # otherwise defer to else statement

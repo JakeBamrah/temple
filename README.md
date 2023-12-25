@@ -14,7 +14,14 @@ Syntax is similar to many of the popular template-engines.
 
 `{% ... %}`  - Block statements such as `if` / `else`
 
-**Note:** Conditional logic can only do truthy checks and cannot evaluate comparisons as of yet.
+Expression logic is safely evaluated using a subset of Python's mathematical
+and comparative operators. The following set of operations are supported:
+  - Mathmatical operators : `add`, `sub`, `div`, `mul`, `mod`, `pow`
+  - Comparison operators  : `==, !=, <, >, <=, >=`
+  - Names                 : variable and starred variables
+
+Variables are provided by passing a `template_vars` object containing variables
+expected and used in template scope.
 
 #### Variables
 ```html
@@ -31,7 +38,7 @@ Syntax is similar to many of the popular template-engines.
 ```html
 <html>
   <body>
-    {% if boolean_value %}
+    {% if str_var == 'variable' or 1 <= x < 10 %}
       <div>Truthy conditional</div>
     {% else %}
       <div>Falsey conditional</div>
